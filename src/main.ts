@@ -77,6 +77,7 @@ class FlightScene extends Phaser.Scene {
   private infoText!: Phaser.GameObjects.Text
   private lastShotAt = 0
   private enemyTimer?: Phaser.Time.TimerEvent
+  private waveIndex = 0
   private state: GameState = {
     score: 0,
     shield: 100,
@@ -119,9 +120,9 @@ class FlightScene extends Phaser.Scene {
     this.gate.setTint(0xffd166)
 
     this.enemyTimer = this.time.addEvent({
-      delay: 900,
+      delay: 1400,
       loop: true,
-      callback: () => this.spawnEnemy(),
+      callback: () => this.spawnWave(),
     })
 
     this.cursors = this.input.keyboard!.createCursorKeys()
@@ -175,17 +176,39 @@ class FlightScene extends Phaser.Scene {
     this.updateHud()
   }
 
-  private spawnEnemy() {
-    const spawnX = Phaser.Math.Between(60, GAME_WIDTH - 60)
-    const enemy = this.enemies.get(spawnX, -30, 'enemy') as Phaser.Physics.Arcade.Image | null
+  private spawnEnemyAt(x: number, yDelay = 0, vx = 0, vy = 200) {
+    this.time.delayedCall(yDelay, () => {
+      const enemy = this.enemies.get(x, -30, 'enemy') as Phaser.Physics.Arcade.Image | null
+      if (!enemy) return
 
-    if (!enemy) return
+      enemy.setActive(true)
+      enemy.setVisible(true)
+      enemy.enableBody(true, x, -30, true, true)
+      enemy.setVelocity(vx, vy)
+    })
+  }
 
-    enemy.setActive(true)
-    enemy.setVisible(true)
-    enemy.enableBody(true, spawnX, -30, true, true)
-    enemy.setVelocityY(Phaser.Math.Between(170, 240))
-    enemy.setVelocityX(Phaser.Math.Between(-30, 30))
+  private spawnWave() {
+    const pattern = this.waveIndex % 3
+
+    if (pattern === 0) {
+      ;[180, 320, 480, 640, 780].forEach((x, index) => {
+        this.spawnEnemyAt(x, index * 120, 0, 185)
+      })
+      this.infoText.setText('Welle: Gerade Formation')
+    } else if (pattern === 1) {
+      ;[140, 260, 380, 500, 620].forEach((x, index) => {
+        this.spawnEnemyAt(x, index * 110, 45, 190)
+      })
+      this.infoText.setText('Welle: Diagonal von links')
+    } else {
+      ;[820, 700, 580, 460, 340].forEach((x, index) => {
+        this.spawnEnemyAt(x, index * 110, -45, 190)
+      })
+      this.infoText.setText('Welle: Diagonal von rechts')
+    }
+
+    this.waveIndex += 1
   }
 
   private fireBullet(now: number) {
