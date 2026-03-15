@@ -97,7 +97,7 @@ class FlightScene extends Phaser.Scene {
     this.bg2 = this.add.tileSprite(0, 0, GAME_WIDTH, GAME_HEIGHT, 'stars').setOrigin(0)
     this.bg2.setTint(0xa8f0ff).setAlpha(0.65)
 
-    this.player = this.physics.add.image(140, GAME_HEIGHT / 2, 'player')
+    this.player = this.physics.add.image(GAME_WIDTH / 2, GAME_HEIGHT - 80, 'player')
     this.player.setCollideWorldBounds(true)
     this.player.setScale(1.1)
 
@@ -113,7 +113,7 @@ class FlightScene extends Phaser.Scene {
       runChildUpdate: false,
     })
 
-    this.gate = this.physics.add.image(GAME_WIDTH - 110, GAME_HEIGHT / 2, 'gate')
+    this.gate = this.physics.add.image(GAME_WIDTH / 2, 110, 'gate')
     this.gate.setImmovable(true)
     this.gate.setScale(2.4)
     this.gate.setTint(0xffd166)
@@ -160,7 +160,7 @@ class FlightScene extends Phaser.Scene {
       .text(
         20,
         GAME_HEIGHT - 54,
-        'Pfeile bewegen · Space schießt · Fliege ins gelbe Lern-Gate',
+        'Pfeile bewegen · Space schießt · Fliege nach oben ins gelbe Lern-Gate',
         {
           fontFamily: 'Inter, system-ui, sans-serif',
           fontSize: '18px',
@@ -173,30 +173,30 @@ class FlightScene extends Phaser.Scene {
   }
 
   private spawnEnemy() {
-    const enemy = this.enemies.get(GAME_WIDTH + 30, Phaser.Math.Between(50, GAME_HEIGHT - 50), 'enemy') as
-      | Phaser.Physics.Arcade.Image
-      | null
+    const spawnX = Phaser.Math.Between(60, GAME_WIDTH - 60)
+    const enemy = this.enemies.get(spawnX, -30, 'enemy') as Phaser.Physics.Arcade.Image | null
 
     if (!enemy) return
 
     enemy.setActive(true)
     enemy.setVisible(true)
-    enemy.enableBody(true, GAME_WIDTH + 30, Phaser.Math.Between(50, GAME_HEIGHT - 50), true, true)
-    enemy.setVelocityX(Phaser.Math.Between(-240, -160))
-    enemy.setVelocityY(Phaser.Math.Between(-20, 20))
+    enemy.enableBody(true, spawnX, -30, true, true)
+    enemy.setVelocityY(Phaser.Math.Between(170, 240))
+    enemy.setVelocityX(Phaser.Math.Between(-30, 30))
   }
 
   private fireBullet(now: number) {
     const fireDelay = this.state.reward === 'rapid-fire' && now < this.state.rewardUntil ? 110 : 220
     if (now - this.lastShotAt < fireDelay) return
 
-    const bullet = this.bullets.get(this.player.x + 22, this.player.y, 'bullet') as Phaser.Physics.Arcade.Image | null
+    const bullet = this.bullets.get(this.player.x, this.player.y - 26, 'bullet') as Phaser.Physics.Arcade.Image | null
     if (!bullet) return
 
     bullet.setActive(true)
     bullet.setVisible(true)
-    bullet.enableBody(true, this.player.x + 22, this.player.y, true, true)
-    bullet.setVelocityX(420)
+    bullet.enableBody(true, this.player.x, this.player.y - 26, true, true)
+    bullet.setAngle(-90)
+    bullet.setVelocityY(-420)
     this.lastShotAt = now
   }
 
@@ -270,8 +270,8 @@ class FlightScene extends Phaser.Scene {
   }
 
   update(_time: number, delta: number) {
-    this.bg1.tilePositionX += 0.06 * delta
-    this.bg2.tilePositionX += 0.14 * delta
+    this.bg1.tilePositionY -= 0.06 * delta
+    this.bg2.tilePositionY -= 0.14 * delta
 
     const speed = 280
     const vx = (this.cursors.left?.isDown ? -1 : 0) + (this.cursors.right?.isDown ? 1 : 0)
@@ -282,13 +282,13 @@ class FlightScene extends Phaser.Scene {
 
     this.bullets.children.each((child) => {
       const bullet = child as Phaser.Physics.Arcade.Image
-      if (bullet.active && bullet.x > GAME_WIDTH + 40) bullet.disableBody(true, true)
+      if (bullet.active && bullet.y < -40) bullet.disableBody(true, true)
       return false
     })
 
     this.enemies.children.each((child) => {
       const enemy = child as Phaser.Physics.Arcade.Image
-      if (enemy.active && enemy.x < -60) enemy.disableBody(true, true)
+      if (enemy.active && enemy.y > GAME_HEIGHT + 60) enemy.disableBody(true, true)
       return false
     })
 
