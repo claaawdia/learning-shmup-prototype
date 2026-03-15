@@ -97,7 +97,7 @@ class FlightScene extends Phaser.Scene {
     this.bg2 = this.add.tileSprite(0, 0, GAME_WIDTH, GAME_HEIGHT, 'stars').setOrigin(0)
     this.bg2.setTint(0xa8f0ff).setAlpha(0.65)
 
-    this.player = this.physics.add.image(GAME_WIDTH / 2, GAME_HEIGHT - 80, 'player')
+    this.player = this.physics.add.image(GAME_WIDTH / 2, GAME_HEIGHT - 120, 'player')
     this.player.setCollideWorldBounds(true)
     this.player.setScale(1.1)
 
@@ -158,15 +158,18 @@ class FlightScene extends Phaser.Scene {
     this.hudText = this.add.text(20, 16, '', HUD_STYLE).setDepth(10)
     this.infoText = this.add
       .text(
-        20,
-        GAME_HEIGHT - 54,
+        GAME_WIDTH - 20,
+        16,
         'Pfeile bewegen · Space schießt · Fliege nach oben ins gelbe Lern-Gate',
         {
           fontFamily: 'Inter, system-ui, sans-serif',
           fontSize: '18px',
           color: '#9ed8ff',
+          align: 'right',
+          wordWrap: { width: 420 },
         },
       )
+      .setOrigin(1, 0)
       .setDepth(10)
 
     this.updateHud()
