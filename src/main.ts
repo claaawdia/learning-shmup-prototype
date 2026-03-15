@@ -101,6 +101,8 @@ class FlightScene extends Phaser.Scene {
     this.player = this.physics.add.image(GAME_WIDTH / 2, GAME_HEIGHT - 120, 'player')
     this.player.setCollideWorldBounds(true)
     this.player.setScale(1.1)
+    this.player.setDrag(900, 900)
+    this.player.setMaxVelocity(260, 260)
 
     this.bullets = this.physics.add.group({
       classType: Phaser.Physics.Arcade.Image,
@@ -299,10 +301,23 @@ class FlightScene extends Phaser.Scene {
     this.bg1.tilePositionY -= 0.06 * delta
     this.bg2.tilePositionY -= 0.14 * delta
 
-    const speed = 280
-    const vx = (this.cursors.left?.isDown ? -1 : 0) + (this.cursors.right?.isDown ? 1 : 0)
-    const vy = (this.cursors.up?.isDown ? -1 : 0) + (this.cursors.down?.isDown ? 1 : 0)
-    this.player.setVelocity(vx * speed, vy * speed)
+    const accel = 20
+    const inputX = (this.cursors.left?.isDown ? -1 : 0) + (this.cursors.right?.isDown ? 1 : 0)
+    const inputY = (this.cursors.up?.isDown ? -1 : 0) + (this.cursors.down?.isDown ? 1 : 0)
+
+    if (inputX !== 0) {
+      this.player.setAccelerationX(inputX * accel * 45)
+    } else {
+      this.player.setAccelerationX(0)
+    }
+
+    if (inputY !== 0) {
+      this.player.setAccelerationY(inputY * accel * 45)
+    } else {
+      this.player.setAccelerationY(0)
+    }
+
+    this.player.setAngle(Phaser.Math.Linear(this.player.angle, inputX * 12, 0.16))
 
     if (this.fireKey.isDown) this.fireBullet(this.time.now)
 
