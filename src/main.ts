@@ -28,7 +28,7 @@ class BootScene extends Phaser.Scene {
     const g = this.add.graphics()
 
     g.fillStyle(0x5be7ff)
-    g.fillTriangle(0, 18, 0, 42, 36, 30)
+    g.fillTriangle(18, 0, 0, 52, 36, 52)
     g.generateTexture('player', 36, 60)
     g.clear()
 
